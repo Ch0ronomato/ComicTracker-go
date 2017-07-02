@@ -8,36 +8,25 @@ import (
 	"comics"
 )
 
-func is_new_release(n *html.Node) bool {
-	if n.Type == html.ElementNode && n.Data == "div" {
-		for _, a := range n.Attr {
-			if a.Key == "class" && strings.Contains(a.Val, "upcoming_releases") {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func found_comic(server *comics.ComicServer, n *html.Node) {
 	server.FoundComics <- n
 }
 
 func main () {
+	var f func(*html.Node, bool)
+	comic_channel := make(chan *comics.Comic)
+	defer close(comic_channel)
+
+
 	res, err := http.Get("https://imagecomics.com/comics/series")
+	defer res.Body.Close()
+
 	if err != nil {
 		fmt.Printf("I died: %s\n", err)
 	}
 
-	// read all tokens
-	var f func(*html.Node, bool)
+	// read body
 	raw, err := ioutil.ReadAll(res.Body)
-	var comic_channel chan *comics.Comic
-	comic_channel = make(chan *comics.Comic)
-
-	defer res.Body.Close()
-	defer close(comic_channel)
-	
 	if err != nil {
 		fmt.Printf("Couldn't read html")
 	}
@@ -47,6 +36,7 @@ func main () {
 		fmt.Printf("Couldn't parse out the html")
 	}
 
+	// run through the html object, finding comics
 	server := comics.NewComicServer(comic_channel)
 	f = func(n *html.Node, is_release bool) {
 		if is_release {
@@ -63,7 +53,7 @@ func main () {
 			return
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c, is_new_release(n))
+			f(c, comics.IsNewRelease(n))
 		}
 	}
 	f(doc, false)

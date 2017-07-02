@@ -23,6 +23,8 @@ func NewComicServer(ResponseChan chan *Comic) *ComicServer {
 
 func (c *ComicServer) loop() {
 	for comic_html := range c.FoundComics {
-		c.ResponseChan <- ComicFromHTML(comic_html)
+		go func() {
+			c.ResponseChan <- ComicFromHTML(comic_html)
+		}()
 	}
 }
