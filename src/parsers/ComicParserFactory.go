@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"comics"
+	"time"
+	"strconv"
 )
 
 type ComicParserFactory func (conf map[string]string) (ComicParser, error)
@@ -16,6 +18,15 @@ func NewImageComicParser(_ map[string]string) (ComicParser, error) {
 	// no conf needed
 	return &ImageComicParser{
 
+	}, nil
+}
+
+func NewValiantEntertainmentParser(_ map[string]string) (ComicParser, error) {
+	year := time.Now().Year()
+	strYear := strconv.Itoa(year)
+	return &ValiantEntertainmentParser {
+		 url: "http://valiantentertainment.com/events/",
+		 yearId: strYear,
 	}, nil
 }
 
@@ -49,4 +60,5 @@ func CreateParser(conf map[string]string, responseChan chan *comics.Comic) (*Com
 
 func init() {
 	Register("imagecomicsparser", NewImageComicParser)
+	Register("valiantentertainmentparser", NewValiantEntertainmentParser)
 }
