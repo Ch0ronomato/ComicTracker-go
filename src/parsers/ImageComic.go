@@ -10,7 +10,6 @@ import (
 
 const IMAGE_COMICS_SRC = "Image Comics"
 
-
 type ImageComicParser struct {
 
 }
