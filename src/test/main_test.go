@@ -9,10 +9,11 @@ import (
 	"strings"
 	"sync"
 	"log"
+	"parsers"
 )
 
 func TestComicFromHtml(t *testing.T) {
-	raw_html := `<div class="grid-cell u-size1of2 u-md-size1of4 u-sm-size1of2"><div class="book"><div class="book__img" style="height: 247px;"><img src="./All Series _ Image Comics_files/Crosswind_01-1.png" alt="Crosswind #1" class="book"></div><div class="book__content"><p class="u-m0"><a href="https://imagecomics.com/comics/releases/crosswind-1">Crosswind #1</a></p><p class="u-m0">June 21, 2017</p></div></div></div>`
+	raw_html := `<div class="grid-cell u-size1of2 u-md-size1of4 u-sm-size1of2"><div class="book"><div class="book__img" style="height: 247px;"><img src="./All Series _ Image Comics_files/Crosswind_01-1.png" alt="Crosswind #1" class="book"></div><div class="book__content"><p class="u-m0"><a href="https://parsers.com/comics/releases/crosswind-1">Crosswind #1</a></p><p class="u-m0">June 21, 2017</p></div></div></div>`
 	comic_html, err := html.Parse(strings.NewReader(raw_html))
 	if err != nil {
 		log.Fatal("error!")
@@ -32,7 +33,17 @@ func TestComicFromHtml(t *testing.T) {
 		return nil
 	}
 	comic_html = f(comic_html)
-	comic := comics.ComicFromHTML(comic_html)
+	_, parser, err := parsers.CreateParser(map[string]string{
+		"PARSER": "imagecomicsparser",
+	}, make(chan *comics.Comic))
+	if err != nil {
+		t.Errorf("Got an error %s", err)
+	}
+	comic, err := parser.ComicFromHTML(comic_html)
+	if err != nil {
+		t.Errorf("Got an error %s", err)
+	}
+
 	if comic.GetTitle() == "" {
 		t.Error("Nope")
 	}
@@ -52,7 +63,9 @@ func TestComicMakingPipeline(t *testing.T) {
 		t.Error("Couldn't read html file")
 	}
 
-	server := comics.NewComicServer(comic_channel)
+	server, parser, err := parsers.CreateParser(map[string]string {
+		"PARSER": "imagecomicsparser",
+	}, comic_channel)
 	var wg sync.WaitGroup
 	var f func(n *html.Node, is_release bool, wg *sync.WaitGroup) int
 	f = func(n *html.Node, is_release bool, wg *sync.WaitGroup) int {
@@ -73,7 +86,7 @@ func TestComicMakingPipeline(t *testing.T) {
 			}
 		} else {
 			for c := n.FirstChild; c != nil; c = c.NextSibling {
-				result := f(c, comics.IsNewRelease(c), wg)
+				result := f(c, parser.IsNewRelease(c), wg)
 				if seen < result {
 					seen = result
 				}

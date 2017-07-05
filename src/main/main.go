@@ -6,13 +6,15 @@ import (
 	"golang.org/x/net/html"
 	"strings"
 	"comics"
+	"parsers"
+	"sync"
 )
 
-func found_comic(server *comics.ComicServer, n *html.Node) {
+func found_comic(server *parsers.ComicServer, n *html.Node) {
 	server.FoundComics <- n
 }
 
-func main () {
+func imagecomics (main_wg *sync.WaitGroup) {
 	var f func(*html.Node, bool)
 	comic_channel := make(chan *comics.Comic)
 	defer close(comic_channel)
@@ -37,8 +39,10 @@ func main () {
 		fmt.Printf("Couldn't parse out the html\n")
 	}
 
-	// run through the html object, finding comics
-	server := comics.NewComicServer(comic_channel)
+	// create a comic parser and run through the html object, finding comics
+	server, parser, err := parsers.CreateParser(map[string]string {
+		"PARSER": "imagecomicsparser",
+	}, comic_channel)
 	f = func(n *html.Node, is_release bool) {
 		if is_release {
 			// we don't want to continue to dig through the tree from here
@@ -54,8 +58,17 @@ func main () {
 			return
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c, comics.IsNewRelease(n))
+			f(c, parser.IsNewRelease(n))
 		}
 	}
 	f(doc, false)
+	main_wg.Done()
+}
+
+func main() {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go imagecomics(&wg)
+	wg.Wait()
+	fmt.Print("Here")
 }
