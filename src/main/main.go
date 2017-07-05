@@ -51,7 +51,11 @@ func DownloadComicSource(url string, parser_name string, main_wg *sync.WaitGroup
 					fmt.Printf("Seeing comic book\n")
 					go found_comic(server, n)
 					comic := <- comic_channel
-					fmt.Printf("Finished here with %s, %s from %s\n", comic.GetTitle(), comic.GetPublished(), comic.GetSource())
+					if comic == nil {
+						fmt.Printf("Comic parser %s has skipped comic\n", parser_name)
+					} else {
+						fmt.Printf("Finished here with %s, %s from %s\n", comic.GetTitle(), comic.GetPublished(), comic.GetSource())
+					}
 				}
 				fmt.Printf("Finishing processing comic\n")
 			}

@@ -5,6 +5,7 @@ import (
 	"golang.org/x/net/html"
 	"strings"
 	"errors"
+	"time"
 )
 
 const VALIANT_ENTERTAINMENT_SRC = "Valiant Entertainment"
@@ -19,9 +20,23 @@ func (vep *ValiantEntertainmentParser) Name() string {
 }
 
 func (vep *ValiantEntertainmentParser) ComicFromHTML(top *html.Node) (*comics.Comic, error) {
+	_, month, _ := time.Now().Date()
+	month_str := month.String()
+	is_new := false
 	if top.Data != "li" {
 		return nil, errors.New("Incorrect element handed to ComicFromHTML")
 	}
+
+	for _,a := range top.Attr {
+		if a.Key == "class" && strings.Contains(a.Val, month_str) {
+			is_new = true
+		}
+	}
+
+	if !is_new {
+		return nil, errors.New("Comic wasn't new")
+	}
+
 	date_node := top.FirstChild.FirstChild
 	name_node := top.LastChild.FirstChild.FirstChild.FirstChild // cause that's not a bad idea....
 	if date_node == nil {
