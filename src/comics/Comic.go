@@ -39,3 +39,7 @@ func (c *Comic) GetPublished() string {
 func (c *Comic) GetPrice() float32 {
 	return c.price
 }
+
+func (c *Comic) GetSource() string {
+	return c.src
+}
