@@ -2,6 +2,7 @@ package comics
 
 import (
 	"golang.org/x/net/html"
+	"fmt"
 )
 
 type ComicServer struct {
@@ -23,8 +24,9 @@ func NewComicServer(ResponseChan chan *Comic) *ComicServer {
 
 func (c *ComicServer) loop() {
 	for comic_html := range c.FoundComics {
-		go func() {
+		fmt.Printf("Queing comic\n")
+		if comic_html != nil {
 			c.ResponseChan <- ComicFromHTML(comic_html)
-		}()
+		}
 	}
 }

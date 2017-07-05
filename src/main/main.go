@@ -30,10 +30,11 @@ func main () {
 	if err != nil {
 		fmt.Printf("Couldn't read html")
 	}
-	doc, err := html.Parse(strings.NewReader(string(raw)))
+	stripped_html := strings.Replace(strings.Replace(string(raw), "\n", "", -1), "\t", "", -1)
+	doc, err := html.Parse(strings.NewReader(stripped_html))
 
 	if err != nil {
-		fmt.Printf("Couldn't parse out the html")
+		fmt.Printf("Couldn't parse out the html\n")
 	}
 
 	// run through the html object, finding comics
@@ -46,9 +47,9 @@ func main () {
 					fmt.Printf("Seeing comic book\n")
 					go found_comic(server, n)
 					comic := <- comic_channel
-					fmt.Printf("Finished here with %s\n", comic.ToString())
+					fmt.Printf("Finished here with %s, %s\n", comic.GetTitle(), comic.GetPublished())
 				}
-				fmt.Printf("Finishing processing comic")
+				fmt.Printf("Finishing processing comic\n")
 			}
 			return
 		}
