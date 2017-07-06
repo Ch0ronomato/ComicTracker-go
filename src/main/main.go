@@ -48,21 +48,19 @@ func DownloadComicSource(url string, parser_name string, main_wg *sync.WaitGroup
 			// we don't want to continue to dig through the tree from here
 			if n.Type == html.ElementNode {
 				for c := n.FirstChild; c != nil; c = c.NextSibling {
-					fmt.Printf("Seeing comic book\n")
-					go found_comic(server, n)
+					go found_comic(server, c)
 					comic := <- comic_channel
 					if comic == nil {
-						fmt.Printf("Comic parser %s has skipped comic\n", parser_name)
+						// fmt.Printf("Comic parser %s has skipped comic\n", parser_name)
 					} else {
 						fmt.Printf("Finished here with %s, %s from %s\n", comic.GetTitle(), comic.GetPublished(), comic.GetSource())
 					}
 				}
-				fmt.Printf("Finishing processing comic\n")
 			}
 			return
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c, parser.IsNewRelease(n))
+			f(c, parser.IsNewRelease(c))
 		}
 	}
 	f(doc, false)

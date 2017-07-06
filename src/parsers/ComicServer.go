@@ -2,7 +2,6 @@ package parsers
 
 import (
 	"golang.org/x/net/html"
-	"fmt"
 	"comics"
 )
 
@@ -25,7 +24,6 @@ func NewComicServer(ResponseChan chan *comics.Comic, parser ComicParser) *ComicS
 
 func (c *ComicServer) loop(parser ComicParser) {
 	for comic_html := range c.FoundComics {
-		fmt.Printf("Queing comic\n")
 		if comic_html != nil {
 			resp, err := parser.ComicFromHTML(comic_html)
 			if err != nil {
