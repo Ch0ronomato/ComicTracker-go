@@ -53,7 +53,7 @@ func DownloadComicSource(url string, parser_name string, main_wg *sync.WaitGroup
 					if comic == nil {
 						// fmt.Printf("Comic parser %s has skipped comic\n", parser_name)
 					} else {
-						fmt.Printf("Finished here with %s, %s from %s\n", comic.GetTitle(), comic.GetPublished(), comic.GetSource())
+						fmt.Printf("Finished here with %s, %s (picture %s) from %s\n", comic.GetTitle(), comic.GetPublished(), comic.GetImgPath(), comic.GetSource())
 					}
 				}
 			}

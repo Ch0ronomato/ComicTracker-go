@@ -5,17 +5,19 @@ type Comic struct {
 	title string
 	writers []string
 	published string
+	imgPath string
 	price float32
 	src string
 }
 
-func NewComic(title string, writers []string, published string, price float32, src string) *Comic {
+func NewComic(title string, writers []string, published string, imgPath string, price float32, src string) *Comic {
 	return &Comic {
-		title: title,
+		title:   title,
 		writers: writers,
 		published: published,
-		price: price,
-		src: src,
+		imgPath: imgPath,
+		price:   price,
+		src:     src,
 	}
 }
 
@@ -30,6 +32,10 @@ func (c *Comic) GetTitle() string {
 
 func (c *Comic) GetWriters() []string {
 	return c.writers
+}
+
+func (c *Comic) GetImgPath() string {
+	return c.imgPath
 }
 
 func (c *Comic) GetPublished() string {

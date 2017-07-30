@@ -20,8 +20,8 @@ func (icp *ImageComicParser) Name() string {
 
 func (icp *ImageComicParser) ComicFromHTML(top *html.Node) (*comics.Comic, error) {
 	// uses BFS to search through tree to find the right parent container, then DFS to get the data
-	var bfs func(nodes[]*html.Node) (name *html.Node, date *html.Node)
-	bfs = func(nodes []*html.Node) (name *html.Node, date *html.Node) {
+	var bfs func(nodes[]*html.Node) (name *html.Node, date *html.Node, image *html.Node)
+	bfs = func(nodes []*html.Node) (name *html.Node, date *html.Node, image *html.Node) {
 		var frontier []*html.Node
 		for _, node := range nodes {
 			if node == nil {
@@ -30,7 +30,14 @@ func (icp *ImageComicParser) ComicFromHTML(top *html.Node) (*comics.Comic, error
 				// depth first search
 				name = node.FirstChild
 				date = node.LastChild
-				return
+				if image != nil {
+					return
+				}
+			} else if is_image(node) {
+				image = node
+				if name != nil && date != nil {
+					return
+				}
 			} else {
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
 					if c.Data == "div" {
@@ -43,11 +50,11 @@ func (icp *ImageComicParser) ComicFromHTML(top *html.Node) (*comics.Comic, error
 		if len(frontier) > 0 {
 			return bfs(frontier)
 		} else {
-			return nil, nil
+			return nil, nil, nil
 		}
 	}
 
-	name_node, date_node := bfs([] *html.Node{top})
+	name_node, date_node, image_node := bfs([] *html.Node{top})
 	if name_node == nil || name_node.FirstChild == nil || name_node.FirstChild.LastChild == nil {
 		fmt.Print("Name node has null elements!\n")
 		return nil, errors.New("Name node was not parsed. The website structure has probably changed")
@@ -58,7 +65,13 @@ func (icp *ImageComicParser) ComicFromHTML(top *html.Node) (*comics.Comic, error
 	}
 	name := name_node.FirstChild.LastChild.Data
 	date := date_node.LastChild.Data
-	return comics.NewComic(name, []string{"author"}, date, 2.32, IMAGE_COMICS_SRC), nil
+	imgPath := ""
+	for _, attr := range image_node.FirstChild.Attr {
+		if attr.Key == "src" {
+			imgPath = attr.Val
+		}
+	}
+	return comics.NewComic(name, []string{"author"}, date, imgPath, 2.32, IMAGE_COMICS_SRC), nil
 }
 
 func (icp *ImageComicParser) IsNewRelease(n *html.Node) bool {
@@ -97,5 +110,15 @@ func is_content(n *html.Node) bool {
 			}
 		}
 	}
+	return false
+}
+
+func is_image(n *html.Node) bool {	if n.Type == html.ElementNode && n.Data == "div" {
+	for _, a := range n.Attr {
+		if a.Key == "class" && strings.Contains(a.Val, "book__img") {
+			return true
+		}
+	}
+}
 	return false
 }
