@@ -2,7 +2,7 @@ package parsers
 
 import (
 	"golang.org/x/net/html"
-	"comics"
+	"ch0ronomato/comictracker/comics"
 )
 
 type ComicParser interface {
