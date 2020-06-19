@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"comics"
+	"ch0ronomato/comictracker/comics"
 	"golang.org/x/net/html"
 	"strings"
 	"errors"

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"comics"
+	"ch0ronomato/comictracker/comics"
 	"time"
 	"strconv"
 )

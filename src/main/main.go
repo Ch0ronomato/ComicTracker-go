@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"golang.org/x/net/html"
+	"ch0ronomato/comictracker/comics"
+	"ch0ronomato/comictracker/parsers"
 	"strings"
-	"comics"
-	"parsers"
 	"sync"
 )
 
